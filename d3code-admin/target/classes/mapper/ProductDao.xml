@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alphay.boot.official.dao.ProductDao">
+
+    <resultMap id="productResult" type="com.alphay.boot.official.dto.ProductDTO">
+        <id column="product_id" property="productId"/>
+        <result column="lang" property="lang"/>
+        <result column="product_model" property="productModel"/>
+        <result column="product_name" property="productName"/>
+        <result column="product_nickname" property="productNickname"/>
+        <result column="product_desc" property="productDesc"/>
+        <result column="sort" property="sort"/>
+        <result column="img_url" property="imgUrl"/>
+        <result column="is_enable" property="isEnable"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+
+        <!-- 使用联合查询获取 ProductPriceDTO -->
+        <association property="productPriceDTO" javaType="com.alphay.boot.official.dto.ProductPriceDTO">
+            <id  column="price_id" property="priceId" />
+            <result  column="opp_lang" property="lang" />
+            <result  column="price" property="price" />
+            <result  column="currency" property="currency" />
+            <result  column="symbol" property="symbol" />
+        </association>
+
+        <collection property="productCategoryDTOList" ofType="com.alphay.boot.official.dto.ProductCategoryDTO">
+            <id column="category_id" property="categoryId"/>
+            <result column="c_lang" property="lang"/>
+            <result column="category_name" property="categoryName"/>
+            <result column="category_type" property="categoryType"/>
+            <result column="c_img_url" property="imgUrl"/>
+            <result column="category_desc" property="categoryDesc"/>
+        </collection>
+
+        <collection property="productSeriesDTOList" ofType="com.alphay.boot.official.dto.ProductSeriesDTO">
+            <id column="series_id" property="seriesId"/>
+            <result column="s_lang" property="lang"/>
+            <result column="series_name" property="seriesName"/>
+            <result column="s_img_url" property="imgUrl"/>
+        </collection>
+
+        <collection property="productTagDTOList" ofType="com.alphay.boot.official.dto.ProductTagDTO">
+            <id column="tag_id" property="tagId"/>
+            <result column="t_lang" property="lang"/>
+            <result column="tag_name" property="tagName"/>
+            <result column="tag_type" property="tagType"/>
+        </collection>
+    </resultMap>
+
+    <select id="getProductList" resultMap="productResult">
+        SELECT
+        p.*,
+
+        c.category_id,
+        c.lang c_lang,
+        c.category_type,
+        c.category_name,
+        c.category_desc,
+        c.img_url c_img_url,
+
+        s.series_id,
+        s.lang s_lang,
+        s.series_name,
+        s.series_desc,
+        s.img_url s_img_url,
+
+        t.tag_id,
+        t.lang t_lang,
+        t.tag_type,
+        t.tag_name,
+
+        opp.price_id,
+        opp.currency,
+        opp.lang opp_lang,
+        opp.price,
+        opp.symbol
+
+        FROM (
+        SELECT
+        op.product_id,
+        op.product_model,
+        opi.lang,
+        opi.product_name,
+        opi.product_nickname,
+        opi.product_desc,
+        op.sort,
+        opi.img_url,
+        op.is_enable,
+        op.is_delete,
+        op.revision,
+        op.create_by_uid,
+        op.create_time,
+        op.update_by_uid,
+        op.update_time
+        FROM off_product op
+        LEFT JOIN off_product_i18n opi on opi.product_id = op.product_id
+        WHERE opi.lang=#{lang}
+        )  p
+        LEFT JOIN off_product_category opc on opc.product_id = p.product_id
+        LEFT JOIN (
+        SELECT
+        oc.category_id,
+        oc.category_type,
+        oci.lang,
+        oci.category_name,
+        oci.img_url,
+        oci.category_desc
+        FROM off_category oc
+        LEFT JOIN off_category_i18n oci on oci.category_id=oc.category_id
+        where oc.category_type = 1 and oci.lang = #{lang}
+        ) c  on c.category_id = opc.category_id
+        LEFT JOIN off_product_series ops  on ops.product_id = p.product_id
+        LEFT JOIN (
+        SELECT
+        os.series_id,
+        osi.lang lang,
+        osi.series_name,
+        osi.series_desc,
+        osi.img_url img_url
+        FROM off_series os
+        LEFT JOIN off_series_i18n osi  on  osi.series_id = os.series_id
+        WHERE osi.lang=#{lang}
+        ) s on s.series_id = ops.series_id
+        LEFT JOIN off_product_tag opt on opt.product_id = p.product_id
+        LEFT JOIN (
+        SELECT
+        ot.tag_id,
+        ot.tag_type,
+        oti.lang,
+        oti.tag_name
+        FROM off_tag ot
+        LEFT JOIN off_tag_i18n oti on oti.tag_id = ot.tag_id
+        WHERE oti.lang = #{lang}  and ot.tag_type = 1
+        ) t on t.tag_id = opt.tag_id
+        LEFT JOIN off_product_price opp on opp.product_id = p.product_id and opp.lang =#{lang}
+        WHERE p.is_delete = 0
+        <if test="lang!=null and lang != ''">
+            AND  p.lang = #{lang}
+        </if>
+        <if test="productCategoryDTOList != null and productCategoryDTOList.size() > 0">
+            AND c.category_id IN
+            <foreach collection="productCategoryDTOList" item="category" open="(" separator="," close=")">
+                #{category.categoryId}
+            </foreach>
+        </if>
+        <if test="productSeriesDTOList != null and productSeriesDTOList.size() > 0">
+            AND s.series_id IN
+            <foreach collection="productSeriesDTOList" item="series" open="(" separator="," close=")">
+                #{series.seriesId}
+            </foreach>
+        </if>
+        <if test="productTagDTOList != null and productTagDTOList.size() > 0">
+            AND t.tag_id IN
+            <foreach collection="productTagDTOList" item="tag" open="(" separator="," close=")">
+                #{tag.tagId}
+            </foreach>
+        </if>
+        <if test="productName != null and productName != ''">
+            AND p.product_name like concat('%', #{productName}, '%')
+        </if>
+        <if test="productModel != null and productModel != ''">
+            AND p.product_model like concat('%', #{productModel}, '%')
+        </if>
+        <if test="productNickname != null and productNickname != ''">
+            AND p.product_nickname  like concat('%', #{productNickname}, '%')
+        </if>
+        <if test="productId != null and productId != ''">
+            AND p.product_id  = #{productId}
+        </if>
+        ORDER BY p.sort ASC
+    </select>
+
+
+
+    <select id="getProductDetail" resultMap="productResult">
+        SELECT
+            p.*,
+
+            c.category_id,
+            c.lang c_lang,
+            c.category_type,
+            c.category_name,
+            c.category_desc,
+            c.img_url c_img_url,
+
+            s.series_id,
+            s.lang s_lang,
+            s.series_name,
+            s.series_desc,
+            s.img_url s_img_url,
+
+            t.tag_id,
+            t.lang t_lang,
+            t.tag_type,
+            t.tag_name,
+
+            opp.price_id,
+            opp.currency,
+            opp.lang opp_lang,
+            opp.price,
+            opp.symbol
+
+        FROM (
+                 SELECT
+                     op.product_id,
+                     op.product_model,
+                     opi.lang,
+                     opi.product_name,
+                     opi.product_nickname,
+                     opi.product_desc,
+                     op.sort,
+                     opi.img_url,
+                     op.is_enable,
+                     op.is_delete,
+                     op.revision,
+                     op.create_by_uid,
+                     op.create_time,
+                     op.update_by_uid,
+                     op.update_time
+                 FROM off_product op
+                          LEFT JOIN off_product_i18n opi on opi.product_id = op.product_id
+                 WHERE opi.lang=#{lang}
+             )  p
+                 LEFT JOIN off_product_category opc on opc.product_id = p.product_id
+                 LEFT JOIN (
+            SELECT
+                oc.category_id,
+                oc.category_type,
+                oci.lang,
+                oci.category_name,
+                oci.img_url,
+                oci.category_desc
+            FROM off_category oc
+                     LEFT JOIN off_category_i18n oci on oci.category_id=oc.category_id
+            where oc.category_type = 1 and oci.lang = #{lang}
+        ) c  on c.category_id = opc.category_id
+                 LEFT JOIN off_product_series ops  on ops.product_id = p.product_id
+                 LEFT JOIN (
+            SELECT
+                os.series_id,
+                osi.lang lang,
+                osi.series_name,
+                osi.series_desc,
+                osi.img_url img_url
+            FROM off_series os
+                     LEFT JOIN off_series_i18n osi  on  osi.series_id = os.series_id
+            WHERE osi.lang=#{lang}
+        ) s on s.series_id = ops.series_id
+                 LEFT JOIN off_product_tag opt on opt.product_id = p.product_id
+                 LEFT JOIN (
+            SELECT
+                ot.tag_id,
+                ot.tag_type,
+                oti.lang,
+                oti.tag_name
+            FROM off_tag ot
+                     LEFT JOIN off_tag_i18n oti on oti.tag_id = ot.tag_id
+            WHERE oti.lang = #{lang}  and ot.tag_type = 1
+        ) t on t.tag_id = opt.tag_id
+                 LEFT JOIN off_product_price opp on opp.product_id = p.product_id and opp.lang = #{lang}
+        WHERE p.is_delete = 0
+        AND p.product_id = #{productId}
+    </select>
+</mapper>

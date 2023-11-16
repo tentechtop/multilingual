@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alphay.boot.official.dao.SeriesDao">
+
+
+    <select id="selectSeriesList" resultType="com.alphay.boot.official.dto.SeriesDTO">
+        select
+            os.series_id seriesId,
+            osi.series_name seriesName,
+            osi.series_desc seriesDesc,
+            osi.img_url imgUrl,
+            os.is_enable isEnable,
+            os.is_delete isDelete,
+            os.create_by_uid createByUid,
+            os.create_time createTime,
+            os.update_by_uid updateByUid,
+            os.update_time updateTime
+        from off_series os
+                 Left join off_series_i18n osi on osi.series_id = os.series_id
+        WHERE os.is_delete=0
+          <if test="lang != null and lang != '' ">
+              and osi.lang=#{lang}
+          </if>
+
+    </select>
+
+    <select id="selectSeriesById" resultType="com.alphay.boot.official.dto.SeriesDTO">
+        select
+            os.series_id seriesId,
+            osi.series_name seriesName,
+            osi.series_desc seriesDesc,
+            osi.img_url imgUrl,
+            os.is_enable isEnable,
+            os.is_delete isDelete,
+            os.create_by_uid createByUid,
+            os.create_time createTime,
+            os.update_by_uid updateByUid,
+            os.update_time updateTime
+        from off_series os
+                 Left join off_series_i18n osi on osi.series_id = os.series_id
+        WHERE os.is_delete=0
+        <if test="lang != null and lang != '' ">
+            and osi.lang=#{lang}
+        </if>
+        <if test="seriesId != null and seriesId != '' ">
+            and os.series_id=#{seriesId}
+        </if>
+
+    </select>
+</mapper>

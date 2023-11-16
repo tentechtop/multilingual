@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alphay.boot.official.dao.SeoDao">
+
+
+    <select id="selectNewsList" resultType="com.alphay.boot.official.entity.Seo">
+        SELECT
+            seo.seo_id,
+            seo.page_id,
+            seo.lang,
+            seo.title,
+            seo.keywords,
+            seo.description
+        FROM `off_seo` seo
+        <where>
+            <if test="pageId != null and pageId != ''">
+                seo.page_id = #{pageId}
+            </if>
+
+            <if test="lang != null and lang != ''">
+                <if test="pageId != null and pageId != ''">
+                    AND
+                </if>
+                seo.lang = #{lang}
+            </if>
+        </where>
+    </select>
+</mapper>

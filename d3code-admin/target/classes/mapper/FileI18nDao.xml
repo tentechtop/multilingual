@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alphay.boot.official.dao.FileI18nDao">
+
+
+    <select id="getFileI18nByFileIdAndLang" resultType="com.alphay.boot.official.entity.FileI18n">
+        SELECT
+            fi.i18n_id,
+            fi.file_id,
+            fi.lang,
+            fi.file_name,
+            fi.file_url,
+            fi.file_desc,
+            fi.file_content
+        FROM `file_i18n` fi
+        where fi.file_id= #{fileId}  and fi.lang=#{lang}
+    </select>
+
+</mapper>

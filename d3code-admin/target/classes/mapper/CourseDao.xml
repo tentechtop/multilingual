@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alphay.boot.official.dao.CourseDao">
+
+
+    <resultMap id="CourseResultMap" type="com.alphay.boot.official.dto.CourseDTO">
+        <id column="course_id" property="courseId"/>
+        <result column="lang" property="lang"/>
+        <result column="sort" property="sort"/>
+        <result column="course_name" property="courseName"/>
+        <result column="course_desc" property="courseDesc"/>
+        <result column="course_cover" property="courseCover"/>
+        <result column="is_enable" property="isEnable"/>
+        <result column="is_delete" property="isDelete"/>
+        <collection property="categoryDTOList" ofType="com.alphay.boot.official.dto.CourseCategoryDTO">
+            <id column="category_id" property="categoryId"/>
+            <result column="category_type" property="categoryType"/>
+            <result column="category_name" property="categoryName"/>
+        </collection>
+        <collection property="courseVideoList" ofType="com.alphay.boot.official.dto.CourseVideoDTO">
+            <id column="video_id" property="videoId"/>
+            <result column="v_course_id" property="courseId"/>
+            <result column="v_lang" property="lang"/>
+            <result column="v_sort" property="sort"/>
+            <result column="v_title" property="title"/>
+            <result column="description" property="description"/>
+            <result column="poster" property="poster"/>
+            <result column="video_url" property="videoUrl"/>
+            <result column="view_count" property="viewCount"/>
+            <result column="like_count" property="likeCount"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectCourseList" resultMap="CourseResultMap">
+        SELECT
+        c.*,
+
+        cat.category_id,
+        cat.category_type,
+        cat.category_name,
+
+        ocv.video_id,
+        ocv.course_id v_course_id,
+        ocv.lang v_lang,
+        ocv.sort v_sort,
+        ocv.title v_title,
+        ocv.description,
+        ocv.video_url,
+        ocv.poster,
+        ocv.view_count,
+        ocv.like_count
+
+        FROM (
+        SELECT
+        ofc.course_id,
+        oci.lang,
+        ofc.sort,
+        oci.course_name,
+        oci.course_desc,
+        oci.course_cover,
+        ofc.is_enable,
+        ofc.is_delete,
+        ofc.create_time,
+        ofc.update_time
+        FROM off_course ofc
+        LEFT JOIN off_course_i18n oci on oci.course_id = ofc.course_id
+        WHERE oci.lang = #{lang}
+        ) c
+        LEFT JOIN off_course_category occ on occ.course_id = c.course_id
+        LEFT JOIN (
+        SELECT
+        cate.category_id,
+        cate.category_type,
+        catei.category_name,
+        catei.img_url,
+        catei.category_desc,
+        cate.is_enable,
+        cate.is_delete,
+        cate.create_time,
+        cate.update_time
+        FROM off_category  cate
+        LEFT JOIN off_category_i18n catei on catei.category_id = cate.category_id
+        WHERE cate.category_type = 2 and catei.lang = #{lang}
+        ) cat on cat.category_id = occ.category_id
+        LEFT JOIN off_course_video  ocv on ocv.course_id = c.course_id and ocv.lang = #{lang}
+        WHERE c.is_delete = 0
+
+        <if test="categoryDTOList != null and categoryDTOList.size() > 0">
+            AND cat.category_id IN
+            <foreach collection="categoryDTOList" item="categoryDTO" open="(" separator="," close=")">
+                #{categoryDTO.categoryId}
+            </foreach>
+        </if>
+        <if test="courseName != null and courseName != ''">
+            AND c.course_name like concat('%', #{courseName}, '%')
+        </if>
+        <if test="courseDesc != null and courseDesc != ''">
+            AND c.course_desc  like concat('%', #{courseDesc}, '%')
+        </if>
+        ORDER BY c.sort and ocv.sort
+    </select>
+
+    <select id="selectCourseById" resultMap="CourseResultMap">
+        SELECT
+        c.*,
+
+        cat.category_id,
+        cat.category_type,
+        cat.category_name,
+
+        ocv.video_id,
+        ocv.course_id v_course_id,
+        ocv.lang v_lang,
+        ocv.sort v_sort,
+        ocv.title v_title,
+        ocv.description,
+        ocv.video_url,
+        ocv.poster,
+        ocv.view_count,
+        ocv.like_count
+
+        FROM (
+        SELECT
+        ofc.course_id,
+        oci.lang,
+        ofc.sort,
+        oci.course_name,
+        oci.course_desc,
+        oci.course_cover,
+        ofc.is_enable,
+        ofc.is_delete,
+        ofc.create_time,
+        ofc.update_time
+        FROM off_course ofc
+        LEFT JOIN off_course_i18n oci on oci.course_id = ofc.course_id
+        WHERE oci.lang = #{lang}
+        ) c
+        LEFT JOIN off_course_category occ on occ.course_id = c.course_id
+        LEFT JOIN (
+        SELECT
+        cate.category_id,
+        cate.category_type,
+        catei.category_name,
+        catei.img_url,
+        catei.category_desc,
+        cate.is_enable,
+        cate.is_delete,
+        cate.create_time,
+        cate.update_time
+        FROM off_category  cate
+        LEFT JOIN off_category_i18n catei on catei.category_id = cate.category_id
+        WHERE cate.category_type = 2 and catei.lang = #{lang}
+        ) cat on cat.category_id = occ.category_id
+        LEFT JOIN off_course_video  ocv on ocv.course_id = c.course_id and ocv.lang = #{lang}
+        WHERE c.is_delete = 0
+
+        <if test="courseId != null and courseId != ''">
+            AND c.course_id = #{courseId}
+        </if>
+        ORDER BY c.sort and ocv.sort
+
+    </select>
+
+</mapper>

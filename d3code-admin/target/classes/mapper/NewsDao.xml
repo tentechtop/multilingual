@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alphay.boot.official.dao.NewsDao">
+
+
+    <select id="selectNewsList" resultType="com.alphay.boot.official.dto.NewsDTO">
+        SELECT
+            n.news_id newsId,
+            n.lang lang,
+            n.cover_img_url coverImgUrl,
+            n.news_title newsTitle,
+            n.html_text htmlText,
+            n.text text,
+            n.sort sort,
+            n.is_enable isEnable,
+            n.create_time createTime,
+            n.update_time updateTime
+        FROM
+            `off_news` n
+        where n.is_delete=0
+        <if test="lang != null and lang != ''">
+            AND n.lang= #{lang}
+        </if>
+        <if test=" newsId!= null and newsId != 0">
+            AND n.news_id = #{newsId}
+        </if>
+        <if test="newsTitle != null and newsTitle != ''">
+            AND n.news_title like concat('%', #{newsTitle}, '%')
+        </if>
+        ORDER BY n.sort ASC
+    </select>
+</mapper>

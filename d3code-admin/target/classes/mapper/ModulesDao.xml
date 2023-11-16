@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alphay.boot.official.dao.ModulesDao">
+
+
+    <resultMap id="modulesResultMap" type="com.alphay.boot.official.dto.ModulesDTO">
+        <id column="modules_id" property="modulesId"/>
+        <result column="lang" property="lang"/>
+        <result column="sort" property="sort"/>
+        <result column="position" property="position"/>
+        <result column="title" property="title"/>
+        <result column="subTitle" property="subTitle"/>
+        <collection property="modulesItemDtoList" ofType="com.alphay.boot.official.dto.ModulesItemDTO">
+            <id column="item_id" property="itemId"/>
+            <result column="modulesId" property="modulesId"/>
+            <result column="lang" property="lang"/>
+            <result column="sort" property="sort"/>
+            <result column="img_url" property="imgUrl"/>
+            <result column="poster" property="poster"/>
+            <result column="video_url" property="videoUrl"/>
+            <result column="title1" property="title1"/>
+            <result column="title2" property="title2"/>
+            <result column="desc1" property="desc1"/>
+            <result column="desc2" property="desc2"/>
+            <result column="url1" property="url1"/>
+            <result column="url1Title" property="url1Title"/>
+            <result column="url2" property="url2"/>
+            <result column="url2Title" property="url2Title"/>
+        </collection>
+    </resultMap>
+
+    <select id="getModulesByCategory" resultMap="modulesResultMap">
+        SELECT
+            m.modules_id,
+            m.lang,
+            m.position,
+            m.sort,
+            m.title,
+            m.sub_title,
+
+            mi.item_id,
+            mi.modules_id,
+            mi.lang,
+            mi.sort,
+            mi.img_url,
+            mi.poster,
+            mi.video_url,
+            mi.title1,
+            mi.title2,
+            mi.desc1,
+            mi.desc2,
+            mi.url1,
+            mi.url1_title,
+            mi.url2,
+            mi.url2_title
+
+        FROM `modules_category` mc
+                 LEFT JOIN modules m on m.modules_id=mc.modules_id
+                 LEFT JOIN category c on c.category_id=mc.category_id
+                 LEFT JOIN modules_item mi on mi.modules_id=m.modules_id
+        where mc.category_id=#{categoryId} and m.lang LIKE concat('%',#{lang},'%')
+        ORDER BY m.sort,mi.sort ASC
+    </select>
+
+
+    <select id="getModulesList" resultType="com.alphay.boot.official.entity.Modules">
+        select
+            m.modules_id,
+            m.lang,
+            m.sort,
+            m.position,
+            m.title,
+            m.sub_title,
+            m.create_time,
+            m.update_time
+        from modules_category mc
+                 Left JOIN modules m on m.modules_id=mc.modules_id
+        where mc.category_id=#{categoryId} and m.lang LIKE concat('%',#{lang},'%')
+        ORDER BY m.sort ASC
+    </select>
+
+
+    <resultMap id="ModulesDTOMap" type="com.alphay.boot.official.dto.ModulesDTO">
+        <id column="modulesId" property="modulesId"/>
+        <result column="lang" property="lang"/>
+        <result column="sort" property="sort"/>
+        <result column="position" property="position"/>
+        <result column="title" property="title"/>
+        <result column="subTitle" property="subTitle"/>
+        <collection property="modulesItemDtoList"  ofType="com.alphay.boot.official.dto.ModulesItemDTO">
+            <id column="itemIdt" property="itemId"/>
+            <result column="modulesIdt" property="modulesId"/>
+            <result column="langt" property="lang"/>
+            <result column="sortt" property="sort"/>
+            <result column="imgUrlt" property="imgUrl"/>
+            <result column="videoUrlt" property="videoUrl"/>
+            <result column="title1t" property="title1"/>
+            <result column="title2t" property="title2"/>
+            <result column="desc1t" property="desc1"/>
+            <result column="desc2t" property="desc2"/>
+            <result column="url1t" property="url1"/>
+            <result column="url1Titlet" property="url1Title"/>
+            <result column="url2t" property="url2"/>
+            <result column="url2Titlet" property="url2Title"/>
+        </collection>
+
+    </resultMap>
+
+    <select id="selectModulesByLangAndId" resultMap="ModulesDTOMap">
+        select
+            om.modules_id modulesId,
+            omi.lang lang,
+            om.sort sort,
+            om.position `position`,
+            omi.title title,
+            omi.sub_title subTitle,
+
+            omt.item_id itemIdt,
+            omt.modules_id modulesIdt,
+            omt.lang langt,
+            omt.sort sortt,
+            omt.img_url imgUrlt,
+            omt.poster postert,
+            omt.video_url videoUrlt,
+            omt.title1 titlet,
+            omt.title2 title2t,
+            omt.desc1 desc1t,
+            omt.desc2 desc2t,
+            omt.url1 url1t,
+            omt.url1_title url1Titlet,
+            omt.url2 url2t,
+            omt.url2_title url2Titlet
+        from off_modules om
+            Left join off_modules_i18n omi on omi.modules_id = om.modules_id
+            Left join off_modules_item omt on omt.modules_id = om.modules_id
+        where omi.lang= #{lang} and om.page_id = #{pageId} and omt.lang = #{lang}
+        ORDER BY om.sort,omt.sort ASC
+    </select>
+    <select id="getModulesByLang" resultType="com.alphay.boot.official.dto.ModulesInfoDTO">
+        SELECT
+            mo.modules_id modulesId,
+            mo.page_id pageId,
+            omi.lang lang,
+            mo.sort sort,
+            mo.position,
+            omi.title,
+            omi.sub_title subTitle
+        FROM  off_modules mo
+        Left join off_modules_i18n omi on omi.modules_id=mo.modules_id
+        where omi.lang=#{lang} and  mo.page_id=#{pageId}  and mo.modules_id = #{modulesId}
+        ORDER BY mo.sort  ASC
+    </select>
+
+    <select id="selectModulesExtDTO" resultType="com.alphay.boot.official.dto.ModulesExtDTO">
+        SELECT
+            mo.modules_id modulesId,
+            mo.page_id pageId,
+            omi.lang lang,
+            mo.sort sort,
+            mo.position,
+            omi.title,
+            omi.sub_title subTitle,
+            mo.create_time createTime,
+            mo.update_time updateTime
+        FROM  off_modules mo
+                  Left join off_modules_i18n omi on omi.modules_id=mo.modules_id
+        where omi.lang=#{lang} and  mo.page_id=#{pageId}
+        ORDER BY mo.sort  ASC
+
+    </select>
+    <select id="selectModulesExtDTOOne" resultType="com.alphay.boot.official.dto.ModulesExtDTO">
+        SELECT
+            mo.modules_id modulesId,
+            mo.page_id pageId,
+            omi.lang lang,
+            mo.sort sort,
+            mo.position,
+            omi.title,
+            omi.sub_title subTitle,
+            mo.create_time createTime,
+            mo.update_time updateTime
+        FROM  off_modules mo
+                  Left join off_modules_i18n omi on omi.modules_id=mo.modules_id
+        where omi.lang=#{lang} and  mo.page_id=#{pageId} and  mo.modules_id = #{modulesId}
+    </select>
+
+
+</mapper>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alphay.boot.official.dao.SpecsParamsDao">
+
+
+    <resultMap id="specsParamsResult" type="com.alphay.boot.official.dto.SpecsParamsDTO">
+        <id column="params_id" property="paramsId"/>
+        <result column="specs_id" property="specsId"/>
+        <result column="lang" property="lang"/>
+        <result column="sort" property="sort"/>
+        <result column="params_title" property="paramsTitle"/>
+        <result column="value_type" property="valueType"/>
+        <result column="number_value" property="numberValue"/>
+        <result column="string_value" property="stringValue"/>
+    </resultMap>
+
+
+
+    <select id="getSpecsParamsList" resultMap="specsParamsResult">
+        SELECT
+            par.*
+        FROM (
+            SELECT
+                osp.params_id,
+                osp.specs_id,
+                osp.sort,
+                ospi.lang,
+                ospi.params_title,
+                osp.value_type,
+                ospi.number_value,
+                ospi.string_value,
+                osp.is_delete
+            FROM off_specs_params osp
+            LEFT JOIN off_specs_params_i18n ospi on ospi.params_id = osp.params_id
+            WHERE ospi.lang  = #{lang} ) par
+        WHERE par.is_delete = 0
+          and par.specs_id = #{specsId}
+          and par.lang = #{lang}
+        <if test="paramsTitle!=null and paramsTitle != ''">
+            and par.params_title = #{paramsTitle}
+        </if>
+    </select>
+
+
+    <select id="getSpecsParamsDetail" resultMap="specsParamsResult">
+        SELECT
+            par.*
+        FROM (
+                 SELECT
+                     osp.params_id,
+                     osp.specs_id,
+                     osp.sort,
+                     ospi.lang,
+                     ospi.params_title,
+                     osp.value_type,
+                     ospi.number_value,
+                     ospi.string_value,
+                     osp.is_delete
+                 FROM off_specs_params osp
+                          LEFT JOIN off_specs_params_i18n ospi on ospi.params_id = osp.params_id
+                 WHERE ospi.lang  = #{lang} ) par
+        WHERE par.is_delete = 0
+          and par.specs_id = #{specsId}
+          and par.lang = #{lang}
+          and par.params_id = #{paramsId}
+    </select>
+
+
+</mapper>

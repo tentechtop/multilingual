@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alphay.boot.official.dao.ProductMediaDao">
+
+    <resultMap id="productMediaResult" type="com.alphay.boot.official.dto.ProductMediaDTO">
+        <id column="media_id" property="mediaId"/>
+        <result column="product_id" property="productId"/>
+        <result column="lang" property="lang"/>
+        <result column="sort" property="sort"/>
+        <result column="type" property="type"/>
+        <result column="img_url" property="imgUrl"/>
+        <result column="video_url" property="videoUrl"/>
+        <result column="alt" property="alt"/>
+    </resultMap>
+
+    <select id="getProductMediaList" resultMap="productMediaResult">
+        SELECT
+
+        opm.media_id,
+        opm.product_id,
+        opmi.lang,
+        opm.sort,
+        opm.type,
+        opmi.img_url,
+        opmi.video_url,
+        opmi.alt
+
+        FROM off_product_media opm
+        LEFT JOIN off_product_media_i18n opmi on opmi.media_id = opm.media_id
+        WHERE opm.is_delete = 0
+        <if test="lang != null and lang !=''">
+            and opmi.lang = #{lang}
+        </if>
+        ORDER BY opm.sort
+    </select>
+    <select id="getProductMediaDetail" resultMap="productMediaResult">
+        SELECT
+
+        opm.media_id,
+        opm.product_id,
+        opmi.lang,
+        opm.sort,
+        opm.type,
+        opmi.img_url,
+        opmi.video_url,
+        opmi.alt
+
+        FROM off_product_media opm
+        LEFT JOIN off_product_media_i18n opmi on opmi.media_id = opm.media_id
+        WHERE opm.is_delete = 0
+        <if test="lang != null and lang !=''">
+            and opmi.lang = #{lang}
+        </if>
+        <if test="productId != null and productId !=''">
+            and opm.product_id = #{productId}
+        </if>
+        ORDER BY opm.sort
+    </select>
+
+
+</mapper>
