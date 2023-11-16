@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alphay.boot.official.dao.LanguageDao">
+
+
+
+    <select id="LanguageListByPage" resultType="com.alphay.boot.official.dto.LanguageDTO">
+       SELECT
+           lg.language_id languageId,
+           lg.lang lang,
+           lg.en_name enName,
+           lg.dialect dialect,
+           lg.flag_img_url flagImgUrl,
+           lg.sort sort,
+           lg.is_enable isEnable,
+           lg.is_delete  isDelete,
+           lg.create_time createTime
+       FROM `off_language` lg
+       where lg.is_delete = 0
+        <if test="lang != null and lang != ''">
+            AND lg.lang like concat('%', #{lang}, '%')
+        </if>
+        <if test="enName != null and enName != ''">
+            AND lg.en_name like concat('%', #{enName}, '%')
+        </if>
+        <if test="dialect != null and dialect != ''">
+            AND lg.dialect like concat('%', #{dialect}, '%')
+        </if>
+        <if test="isEnable != null and isEnable != ''">
+            AND lg.is_enable = #{isEnable}
+        </if>
+        <if test="isDelete != null and isDelete != ''">
+            AND lg.is_delete = #{isDelete}
+        </if>
+
+        ORDER BY
+            lg.sort ASC
+    </select>
+
+
+    <select id="LanguageList" resultType="com.alphay.boot.official.dto.LanguageDTO">
+        SELECT
+            lg.language_id languageId,
+            lg.lang lang,
+            lg.en_name enName,
+            lg.dialect dialect,
+            lg.flag_img_url flagImgUrl
+        FROM `off_language` lg
+        WHERE lg.is_delete=0
+        ORDER BY
+            lg.sort ASC
+    </select>
+
+
+
+    <select id="LanguageListExcludeCurrent" resultType="com.alphay.boot.official.dto.LanguageDTO">
+        SELECT
+            lg.language_id languageId,
+            lg.lang lang,
+            lg.en_name enName,
+            lg.dialect dialect,
+            lg.flag_img_url flagImgUrl
+        FROM `off_language` lg
+        WHERE lg.is_delete = 0 AND lg.lang != #{lang}
+        ORDER BY
+            lg.sort ASC;
+    </select>
+
+
+</mapper>

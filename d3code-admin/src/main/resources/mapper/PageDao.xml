@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alphay.boot.official.dao.PageDao">
+
+
+    <select id="selectPageList" resultType="com.alphay.boot.official.entity.Page">
+        SELECT
+            pg.page_id pageId,
+            pg.page_name pageName,
+            pg.page_url pageUrl,
+            pg.page_desc pageDesc,
+            pg.is_delete isDelete,
+            pg.create_time createTime,
+            pg.update_time updateTime
+        FROM `off_page` pg
+        WHERE pg.is_delete = 0
+        <if test="pageName != null and pageName != ''">
+            AND pg.page_name like concat('%', #{pageName}, '%')
+        </if>
+        <if test="pageDesc != null and pageDesc != ''">
+            AND pg.page_desc like concat('%', #{pageDesc}, '%')
+        </if>
+        <if test="pageUrl != null and pageUrl != ''">
+            AND pg.page_url like concat('%', #{pageUrl}, '%')
+        </if>
+
+    </select>
+
+    <resultMap id="pageDTOMap" type="com.alphay.boot.official.dto.page.PageDTO">
+        <id column="page_id" property="pageId"/>
+
+
+
+    </resultMap>
+
+    <select id="selectPageByLangAndId" resultType="com.alphay.boot.official.dto.page.PageDTO">
+
+
+
+
+
+    </select>
+
+
+
+</mapper>

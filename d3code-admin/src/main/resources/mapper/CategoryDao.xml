@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alphay.boot.official.dao.CategoryDao">
+
+
+    <select id="selectCategoryList" resultType="com.alphay.boot.official.dto.CategoryDTO">
+        SELECT
+            c.category_id categoryId,
+            ci.lang,
+            c.category_type categoryType,
+            ci.category_name categoryName,
+            ci.img_url imgUrl,
+            ci.category_desc categoryDesc,
+            c.is_enable  isEnable,
+            c.is_delete isDelete,
+            c.create_time createTime,
+            c.update_time updateTime
+        FROM `off_category` c
+        LEFT JOIN off_category_i18n ci on ci.category_id = c.category_id
+        WHERE c.is_delete=0
+        <if test="lang != null and lang != ''">
+            AND ci.lang = #{lang}
+        </if>
+
+        <if test="categoryName != null and categoryName != ''">
+            AND ci.category_name like concat('%', #{categoryName}, '%')
+        </if>
+
+        <if test="categoryType != null and categoryType != ''">
+            AND c.category_type = #{categoryType}
+        </if>
+    </select>
+
+    <select id="selectCategoryById" resultType="com.alphay.boot.official.dto.CategoryDTO">
+        SELECT
+        c.category_id categoryId,
+        ci.lang,
+        c.category_type categoryType,
+        ci.category_name categoryName,
+        ci.img_url imgUrl,
+        ci.category_desc categoryDesc,
+        c.is_enable  isEnable,
+        c.is_delete isDelete,
+        c.create_time createTime,
+        c.update_time updateTime
+        FROM `off_category` c
+        LEFT JOIN off_category_i18n ci on ci.category_id = c.category_id
+        WHERE c.is_delete=0
+        <if test="categoryId != null and categoryId != ''">
+            AND c.category_id = #{categoryId}
+        </if>
+        <if test="lang != null and lang != ''">
+            AND ci.lang = #{lang}
+        </if>
+    </select>
+</mapper>

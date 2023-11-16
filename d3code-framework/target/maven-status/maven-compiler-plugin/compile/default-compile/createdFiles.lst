@@ -1,0 +1,15 @@
+com\alphay\boot\framework\config\ServerConfig.class
+com\alphay\boot\framework\config\RedisConfig.class
+com\alphay\boot\framework\interceptor\RepeatSubmitInterceptor.class
+com\alphay\boot\framework\config\ThreadPoolConfig$1.class
+com\alphay\boot\framework\datasource\DynamicDataSource.class
+com\alphay\boot\framework\ThreadLocals.class
+com\alphay\boot\framework\interceptor\impl\SameUrlDataInterceptor.class
+com\alphay\boot\framework\config\ApplicationConfig.class
+com\alphay\boot\framework\config\ResourcesConfig.class
+com\alphay\boot\framework\config\FastJson2JsonRedisSerializer.class
+com\alphay\boot\framework\datasource\DynamicDataSourceContextHolder.class
+com\alphay\boot\framework\interceptor\LanguageInterceptor.class
+com\alphay\boot\framework\config\ThreadPoolConfig.class
+com\alphay\boot\framework\config\properties\DruidProperties.class
+com\alphay\boot\framework\config\FilterConfig.class

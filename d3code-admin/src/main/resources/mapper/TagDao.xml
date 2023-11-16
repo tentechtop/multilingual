@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alphay.boot.official.dao.TagDao">
+
+
+    <select id="selectNewsList" resultType="com.alphay.boot.official.dto.TagDTO">
+        SELECT
+            t.tag_id tagId,
+            ti.lang,
+            ti.tag_name tagName,
+            t.tag_type tagType,
+            t.is_enable `isEnable`,
+            t.is_delete `isDelete`,
+            t.create_time createTime,
+            t.update_time updateTime
+        FROM `off_tag` t
+        LEFT JOIN off_tag_i18n ti on ti.tag_id = t.tag_id
+        WHERE t.is_delete = 0
+        <if test="lang != null and lang != ''">
+            AND ti.lang = #{lang}
+        </if>
+        <if test="tagType != null and tagType != ''">
+            AND t.tag_type = #{tagType}
+        </if>
+        <if test="tagName != null and tagName != ''">
+            AND t.tag_name = like concat('%', #{tagName}, '%')
+        </if>
+    </select>
+
+    <select id="selectTagById" resultType="com.alphay.boot.official.dto.TagDTO">
+        SELECT
+        t.tag_id tagId,
+        ti.lang,
+        ti.tag_name tagName,
+        t.tag_type tagType,
+        t.is_enable `isEnable`,
+        t.is_delete `isDelete`,
+        t.create_time createTime,
+        t.update_time updateTime
+        FROM `off_tag` t
+        LEFT JOIN off_tag_i18n ti on ti.tag_id = t.tag_id
+        WHERE t.is_delete = 0 and t.tag_id=#{tagId} and ti.lang = #{lang}
+    </select>
+</mapper>

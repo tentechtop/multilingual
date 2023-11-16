@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alphay.boot.official.dao.ProductSpecsDao">
+
+    <resultMap id="productSpecsResult" type="com.alphay.boot.official.dto.ProductSpecsDTO">
+        <id  column="specs_id" property="specsId"/>
+        <result column="product_id" property="productId"/>
+        <result column="lang" property="lang"/>
+        <result column="sort" property="sort"/>
+        <result column="specs_name" property="specsName"/>
+        <result column="img_url" property="imgUrl"/>
+        <collection property="paramsDTOList" ofType="com.alphay.boot.official.dto.SpecsParamsDTO">
+            <id  column="params_id" property="paramsId"/>
+            <result  column="p_specs_id" property="specsId"/>
+            <result column="p_lang" property="lang"/>
+            <result column="params_title" property="paramsTitle"/>
+            <result column="value_type" property="valueType"/>
+            <result column="number_value" property="numberValue"/>
+            <result column="string_value" property="stringValue"/>
+        </collection>
+    </resultMap>
+
+
+
+
+
+    <select id="getProductSpecsList" resultMap="productSpecsResult">
+        SELECT
+            spc.*,
+            par.*
+        FROM (
+            SELECT
+                ops.specs_id,
+                ops.product_id,
+                opsi.lang,
+                ops.sort,
+                opsi.specs_name,
+                opsi.img_url
+            FROM off_product_specs ops
+            LEFT JOIN off_product_specs_i18n opsi on opsi.specs_id  = ops.specs_id
+            WHERE  ops.is_delete =  0  <if test="lang != null and lang != ''"> and opsi.lang = #{lang}</if> ) spc
+        LEFT JOIN (
+            SELECT
+                osp.params_id,
+                osp.specs_id p_specs_id,
+                ospi.lang p_lang,
+                osp.sort p_sort,
+                ospi.params_title,
+                osp.value_type,
+                ospi.number_value,
+                ospi.string_value
+            FROM off_specs_params osp
+            LEFT JOIN off_specs_params_i18n ospi on ospi.params_id = osp.params_id
+            WHERE osp.is_delete = 0  <if test="lang != null and lang != ''">and ospi.lang = #{lang}</if>
+            ORDER BY osp.sort ASC )par on par.p_specs_id = spc.specs_id
+        <if test="specsName != null and  specsName!='' ">
+            WHERE spc.specs_name = like concat('%', #{specsName}, '%')
+        </if>
+        ORDER BY spc.sort
+    </select>
+
+
+    <select id="getProductSpecsDetail" resultMap="productSpecsResult">
+
+        SELECT
+        spc.*,
+        par.*
+        FROM (
+        SELECT
+        ops.specs_id,
+        ops.product_id,
+        opsi.lang,
+        ops.sort,
+        opsi.specs_name,
+        opsi.img_url
+        FROM off_product_specs ops
+        LEFT JOIN off_product_specs_i18n opsi on opsi.specs_id  = ops.specs_id
+        WHERE  ops.is_delete =  0  <if test="lang != null and lang != ''"> and opsi.lang = #{lang}</if> ) spc
+        LEFT JOIN (
+        SELECT
+        osp.params_id,
+        osp.specs_id p_specs_id,
+        ospi.lang p_lang,
+        osp.sort p_sort,
+        ospi.params_title,
+        osp.value_type,
+        ospi.number_value,
+        ospi.string_value
+        FROM off_specs_params osp
+        LEFT JOIN off_specs_params_i18n ospi on ospi.params_id = osp.params_id
+        WHERE osp.is_delete = 0  <if test="lang != null and lang != ''">and ospi.lang = #{lang}</if>
+        ORDER BY osp.sort ASC )par on par.p_specs_id = spc.specs_id
+
+        WHERE  spc.specs_id =  #{specsId}
+
+    </select>
+</mapper>

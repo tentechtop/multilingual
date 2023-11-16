@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alphay.boot.official.dao.FaqDao">
+
+    <resultMap id="FaqListMap" type="com.alphay.boot.official.dto.FaqDTO">
+        <id column="faq_id" property="faqId"/>
+        <result column="lang" property="lang"/>
+        <result column="sort" property="sort"/>
+        <result column="faq_title" property="faqTitle"/>
+        <result column="faq_question" property="faqQuestion"/>
+        <result column="faq_answers" property="faqAnswers"/>
+        <result column="like_number" property="likeNumber"/>
+        <result column="is_delete" property="isDelete"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+
+        <collection property="categoryDTOList" ofType="com.alphay.boot.official.dto.FaqCategoryDTO">
+            <id column="category_id" property="categoryId"/>
+            <result column="c_lang" property="lang"/>
+            <result column="category_name" property="categoryName"/>
+            <result column="category_type" property="categoryType"/>
+            <result column="img_url" property="imgUrl"/>
+            <result column="category_desc" property="categoryDesc"/>
+        </collection>
+
+        <collection property="tagDTOList" ofType="com.alphay.boot.official.dto.FaqTagDTO">
+            <id column="tag_id" property="tagId"/>
+            <result column="t_lang" property="lang"/>
+            <result column="tag_name" property="tagName"/>
+            <result column="tag_type" property="tagType"/>
+        </collection>
+    </resultMap>
+
+
+    <select id="selectFileList" resultMap="FaqListMap">
+        SELECT
+
+        f.*,
+
+        c.category_id,
+        c.lang c_lang,
+        c.category_type,
+        c.category_name,
+        c.category_desc,
+        c.img_url,
+
+        t.tag_id,
+        t.lang t_lang,
+        t.tag_type,
+        t.tag_name
+
+        FROM (
+
+        SELECT
+        ofa .faq_id,
+        ofa .sort,
+        ofi.lang,
+        ofi.faq_title,
+        ofi.faq_question,
+        ofi.faq_answers,
+        ofa .like_number,
+        ofa .is_delete,
+        ofa .create_time,
+        ofa .update_time
+        FROM  off_faq ofa
+        LEFT JOIN off_faq_i18n ofi on ofi.faq_id = ofa.faq_id and ofi.lang = #{lang}
+        ) f
+
+        LEFT JOIN off_faq_category ofc on ofc.faq_id = f.faq_id
+
+        LEFT JOIN (
+        SELECT
+        oc.category_id,
+        oci.lang,
+        oc.category_type,
+        oci.category_name,
+        oci.img_url,
+        oci.category_desc
+        FROM off_category oc
+        LEFT JOIN off_category_i18n oci on oci.category_id = oc.category_id
+        WHERE oc.category_type = 4 and oci.lang = #{lang}
+        ) c on c.category_id = ofc.category_id
+
+        LEFT JOIN off_faq_tag oft on oft.faq_id = f.faq_id
+
+        LEFT JOIN (
+        SELECT
+        ot.tag_id,
+        ot.tag_type,
+        oti.lang,
+        oti.tag_name
+        FROM off_tag ot
+        LEFT JOIN off_tag_i18n oti on oti.tag_id = ot.tag_id
+        WHERE ot.tag_type = 2 and oti.lang = #{lang}
+        ) t on t.tag_id = oft.tag_id
+
+        WHERE f.is_delete = 0
+
+        <if test="lang!=null and lang != ''">
+          AND  f.lang = #{lang}
+        </if>
+        <if test="tagDTOList != null and tagDTOList.size() > 0">
+            AND t.tag_id IN
+            <foreach collection="tagDTOList" item="tagDTO" open="(" separator="," close=")">
+                #{tagDTO.tagId}
+            </foreach>
+        </if>
+        <if test="categoryDTOList != null and categoryDTOList.size() > 0">
+            AND c.category_id IN
+            <foreach collection="categoryDTOList" item="categoryDTO" open="(" separator="," close=")">
+                #{categoryDTO.categoryId}
+            </foreach>
+        </if>
+        <if test="faqAnswers != null and faqAnswers != ''">
+            AND f.faq_answers  like concat('%', #{faqAnswers}, '%')
+        </if>
+        <if test="faqTitle != null and faqTitle != ''">
+            AND f.faq_title  like concat('%', #{faqTitle}, '%')
+        </if>
+        <if test="faqQuestion != null and faqQuestion != ''">
+            AND f.faq_question  like concat('%', #{faqQuestion}, '%')
+        </if>
+        ORDER BY f.sort ASC
+    </select>
+
+
+    <resultMap id="FaqDetailListMap" type="com.alphay.boot.official.dto.FaqDTO">
+        <id column="faq_id" property="faqId"/>
+        <result column="lang" property="lang"/>
+        <result column="sort" property="sort"/>
+        <result column="faq_title" property="faqTitle"/>
+        <result column="faq_question" property="faqQuestion"/>
+        <result column="faq_answers" property="faqAnswers"/>
+        <result column="like_number" property="likeNumber"/>
+        <result column="is_delete" property="isDelete"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+
+        <collection property="categoryDTOList" ofType="com.alphay.boot.official.dto.FaqCategoryDTO">
+            <id column="category_id" property="categoryId"/>
+            <result column="c_lang" property="lang"/>
+            <result column="category_name" property="categoryName"/>
+            <result column="category_type" property="categoryType"/>
+            <result column="img_url" property="imgUrl"/>
+            <result column="category_desc" property="categoryDesc"/>
+        </collection>
+
+        <collection property="tagDTOList" ofType="com.alphay.boot.official.dto.FaqTagDTO">
+            <id column="tag_id" property="tagId"/>
+            <result column="t_lang" property="lang"/>
+            <result column="tag_name" property="tagName"/>
+            <result column="tag_type" property="tagType"/>
+        </collection>
+    </resultMap>
+
+
+    <select id="selectFaqById" resultMap="FaqDetailListMap">
+        SELECT
+
+            f.*,
+
+            c.category_id,
+            c.lang c_lang,
+            c.category_type,
+            c.category_name,
+            c.category_desc,
+            c.img_url,
+
+            t.tag_id,
+            t.lang t_lang,
+            t.tag_type,
+            t.tag_name
+
+        FROM (
+            SELECT
+            ofa .faq_id,
+            ofa .sort,
+            ofi.lang,
+            ofi.faq_title,
+            ofi.faq_question,
+            ofi.faq_answers,
+            ofa .like_number,
+            ofa .is_delete,
+            ofa .create_time,
+            ofa .update_time
+            FROM  off_faq ofa
+            LEFT JOIN off_faq_i18n ofi on ofi.faq_id = ofa.faq_id and ofi.lang = #{lang}) f
+            LEFT JOIN off_faq_category ofc on ofc.faq_id = f.faq_id
+            LEFT JOIN (
+            SELECT
+                oc.category_id,
+                oci.lang,
+                oc.category_type,
+                oci.category_name,
+                oci.img_url,
+                oci.category_desc
+            FROM off_category oc
+            LEFT JOIN off_category_i18n oci on oci.category_id = oc.category_id
+            WHERE oc.category_type = 4 and oci.lang = #{lang}) c on c.category_id = ofc.category_id
+            LEFT JOIN off_faq_tag oft on oft.faq_id = f.faq_id
+            LEFT JOIN (
+            SELECT
+                ot.tag_id,
+                ot.tag_type,
+                oti.lang,
+                oti.tag_name
+            FROM off_tag ot
+            LEFT JOIN off_tag_i18n oti on oti.tag_id = ot.tag_id
+            WHERE ot.tag_type = 2 and oti.lang = #{lang}) t on t.tag_id = oft.tag_id
+            WHERE f.is_delete = 0
+            AND  f.lang = #{lang}
+            AND  f.faq_id = #{faqId}
+    </select>
+</mapper>

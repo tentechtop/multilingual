@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alphay.boot.official.dao.FileDao">
+
+
+    <resultMap id="FileDTOList" type="com.alphay.boot.official.dto.FileDTO">
+        <id column="file_id" property="fileId"/>
+        <result column="lang" property="lang"/>
+        <result column="sort" property="sort"/>
+        <result column="file_format" property="fileFormat"/>
+        <result column="file_name" property="fileName"/>
+        <result column="file_url" property="fileUrl"/>
+        <result column="file_desc" property="fileDesc"/>
+        <result column="file_content" property="fileContent"/>
+        <result column="is_enable" property="isEnable"/>
+        <result column="is_delete" property="isDelete"/>
+        <result column="create_by_uid" property="createByUid"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by_uid" property="updateByUid"/>
+        <result column="update_time" property="updateTime"/>
+        <collection property="categoryDTOList"  ofType="com.alphay.boot.official.dto.CategoryDTO">
+            <id column="category_id" property="categoryId"/>
+            <result column="c_lang" property="lang"/>
+            <result column="category_name" property="categoryName"/>
+            <result column="category_type" property="categoryType"/>
+            <result column="img_url" property="imgUrl"/>
+            <result column="category_desc" property="categoryDesc"/>
+            <result column="c_is_enable" property="isEnable"/>
+            <result column="c_is_delete" property="isDelete"/>
+            <result column="c_create_time" property="createTime"/>
+            <result column="c_update_time" property="updateTime"/>
+        </collection>
+    </resultMap>
+
+
+    <select id="selectFileList" resultMap="FileDTOList">
+        SELECT
+        f.*,
+
+        c.category_id,
+        c.category_type,
+        c.lang c_lang,
+        c.category_name,
+        c.img_url,
+        c.category_desc,
+        c.is_enable c_is_enable,
+        c.is_delete c_is_delete,
+        c.create_by_uid c_create_by_uid,
+        c.create_time c_create_time,
+        c.update_by_uid c_update_by_uid,
+        c.update_time c_update_time
+
+        FROM (
+        SELECT
+        off.file_id,
+        ofi.lang,
+        off.sort,
+        off.file_format,
+        ofi.file_name,
+        ofi.file_url,
+        ofi.file_desc,
+        ofi.file_content,
+        off.is_enable,
+        off.is_delete,
+        off.create_by_uid,
+        off.create_time,
+        off.update_by_uid,
+        off.update_time
+
+        FROM off_file off
+        LEFT JOIN off_file_i18n  ofi on ofi.file_id = off.file_id
+        WHERE ofi.lang =  #{lang}
+        ) f
+        LEFT JOIN off_file_category ofc on ofc.file_id = f.file_id
+        LEFT JOIN (
+        SELECT
+        oc.category_id,
+        oc.category_type,
+        oci.lang,
+        oci.category_name,
+        oci.img_url,
+        oci.category_desc,
+        oc.is_enable,
+        oc.is_delete,
+        oc.create_by_uid,
+        oc.create_time,
+        oc.update_by_uid,
+        oc.update_time
+
+        FROM off_category oc
+        LEFT JOIN off_category_i18n oci on oci.category_id = oc.category_id
+        WHERE oc.category_type = 3 and oci.lang =  #{lang}
+        ) c on c.category_id = ofc.category_id
+        WHERE f.is_delete = 0
+
+        <if test="categoryVOList != null and categoryVOList.size() > 0">
+            AND c.category_id IN
+            <foreach collection="categoryVOList" item="category" open="(" separator="," close=")">
+                #{category.categoryId}
+            </foreach>
+        </if>
+        <if test="fileName != null and  fileName!='' ">
+            AND f.file_name = like concat('%', #{fileName}, '%')
+        </if>
+        <if test="fileFormat != null and fileFormat!='' ">
+            AND f.file_format = like concat('%', #{fileFormat}, '%')
+        </if>
+        <if test="fileDesc != null and fileDesc!='' ">
+            AND f.file_desc = like concat('%', #{fileDesc}, '%')
+        </if>
+    </select>
+
+    <select id="selectFileById" resultMap="FileDTOList">
+        SELECT
+        f.*,
+
+        c.category_id,
+        c.category_type,
+        c.lang c_lang,
+        c.category_name,
+        c.img_url,
+        c.category_desc,
+        c.is_enable c_is_enable,
+        c.is_delete c_is_delete,
+        c.create_by_uid c_create_by_uid,
+        c.create_time c_create_time,
+        c.update_by_uid c_update_by_uid,
+        c.update_time c_update_time
+
+        FROM (
+        SELECT
+        off.file_id,
+        ofi.lang,
+        off.file_format,
+        ofi.file_name,
+        ofi.file_url,
+        ofi.file_desc,
+        ofi.file_content,
+        off.is_enable,
+        off.is_delete,
+        off.create_by_uid,
+        off.create_time,
+        off.update_by_uid,
+        off.update_time
+
+        FROM off_file off
+        LEFT JOIN off_file_i18n  ofi on ofi.file_id = off.file_id
+        WHERE ofi.lang =  #{lang}
+        ) f
+        LEFT JOIN off_file_category ofc on ofc.file_id = f.file_id
+        LEFT JOIN (
+        SELECT
+        oc.category_id,
+        oc.category_type,
+        oci.lang,
+        oci.category_name,
+        oci.img_url,
+        oci.category_desc,
+        oc.is_enable,
+        oc.is_delete,
+        oc.create_by_uid,
+        oc.create_time,
+        oc.update_by_uid,
+        oc.update_time
+
+        FROM off_category oc
+        LEFT JOIN off_category_i18n oci on oci.category_id = oc.category_id
+        WHERE oc.category_type = 3 and oci.lang =  #{lang}
+        ) c on c.category_id = ofc.category_id
+        WHERE f.is_delete = 0
+        <if test="lang != null and lang != ''">
+            AND f.lang = #{lang}
+        </if>
+        <if test="fileId != null and fileId != ''">
+            AND f.file_id = #{fileId}
+        </if>
+    </select>
+
+
+    <resultMap id="productFileResultMap" type="com.alphay.boot.official.dto.ProductFileDTO">
+        <id column="file_id" property="fileId"/>
+        <result column="product_id" property="productId"/>
+        <result column="sort" property="sort"/>
+        <result column="lang" property="lang"/>
+        <result column="file_format" property="fileFormat"/>
+        <result column="file_name" property="fileName"/>
+        <result column="file_url" property="fileUrl"/>
+        <result column="file_desc" property="fileDesc"/>
+        <result column="file_content" property="fileContent"/>
+        <collection property="categoryDTOList"  ofType="com.alphay.boot.official.dto.FileCategoryDTO">
+            <id column="category_id" property="categoryId"/>
+            <result column="c_lang" property="lang"/>
+            <result column="category_name" property="categoryName"/>
+            <result column="category_type" property="categoryType"/>
+            <result column="img_url" property="imgUrl"/>
+            <result column="category_desc" property="categoryDesc"/>
+        </collection>
+    </resultMap>
+
+
+
+    <select id="getProductFileList" resultMap="productFileResultMap">
+        SELECT
+            f.*,
+            opf.product_id,
+            c.category_id,
+            c.category_type,
+            c.lang c_lang,
+            c.category_name,
+            c.img_url,
+            c.category_desc
+        FROM (
+                 SELECT
+                    off.file_id,
+                    off.sort,
+                    ofi.lang,
+                    off.file_format,
+                    ofi.file_name,
+                    ofi.file_url,
+                    ofi.file_desc,
+                    ofi.file_content,
+                    off.is_enable,
+                    off.is_delete,
+                    off.create_by_uid,
+                    off.create_time,
+                    off.update_by_uid,
+                    off.update_time
+                 FROM off_file off
+                 LEFT JOIN off_file_i18n  ofi on ofi.file_id = off.file_id
+                 WHERE ofi.lang =  #{lang} )f
+            LEFT JOIN off_product_file opf on opf.file_id = f.file_id
+            LEFT JOIN off_file_category ofc on ofc.file_id = f.file_id
+            LEFT JOIN (
+                SELECT
+                oc.category_id,
+                oc.category_type,
+                oci.lang,
+                oci.category_name,
+                oci.img_url,
+                oci.category_desc,
+                oc.is_enable,
+                oc.is_delete,
+                oc.create_by_uid,
+                oc.create_time,
+                oc.update_by_uid,
+                oc.update_time
+            FROM off_category oc
+            LEFT JOIN off_category_i18n oci on oci.category_id = oc.category_id
+            WHERE oc.category_type = 3 and oci.lang =  #{lang}) c on c.category_id = ofc.category_id
+        WHERE f.is_delete = 0 and opf.product_id = #{productId}
+    </select>
+
+
+    <select id="getProductFileDetail" resultMap="productFileResultMap">
+        SELECT
+            f.*,
+            opf.product_id,
+            c.category_id,
+            c.category_type,
+            c.lang c_lang,
+            c.category_name,
+            c.img_url,
+            c.category_desc
+        FROM (
+                 SELECT
+                     off.file_id,
+                     ofi.lang,
+                     off.sort,
+                     off.file_format,
+                     ofi.file_name,
+                     ofi.file_url,
+                     ofi.file_desc,
+                     ofi.file_content,
+                     off.is_enable,
+                     off.is_delete,
+                     off.create_by_uid,
+                     off.create_time,
+                     off.update_by_uid,
+                     off.update_time
+                 FROM off_file off
+                          LEFT JOIN off_file_i18n  ofi on ofi.file_id = off.file_id
+                 WHERE ofi.lang =  #{lang} )f
+                 LEFT JOIN off_product_file opf on opf.file_id = f.file_id
+                 LEFT JOIN off_file_category ofc on ofc.file_id = f.file_id
+                 LEFT JOIN (
+            SELECT
+                oc.category_id,
+                oc.category_type,
+                oci.lang,
+                oci.category_name,
+                oci.img_url,
+                oci.category_desc,
+                oc.is_enable,
+                oc.is_delete,
+                oc.create_by_uid,
+                oc.create_time,
+                oc.update_by_uid,
+                oc.update_time
+            FROM off_category oc
+                     LEFT JOIN off_category_i18n oci on oci.category_id = oc.category_id
+            WHERE oc.category_type = 3 and oci.lang =  #{lang}) c on c.category_id = ofc.category_id
+        WHERE f.is_delete = 0  and f.file_id = #{fileId}
+
+    </select>
+
+
+
+
+    <resultMap id="esFileDTOList" type="com.alphay.boot.official.dto.EsFileDTO">
+        <id column="file_id" property="fileId"/>
+        <result column="lang" property="lang"/>
+        <result column="sort" property="sort"/>
+        <result column="file_format" property="fileFormat"/>
+        <result column="file_name" property="fileName"/>
+        <result column="file_url" property="fileUrl"/>
+        <result column="file_desc" property="fileDesc"/>
+        <result column="file_content" property="fileContent"/>
+        <result column="is_enable" property="isEnable"/>
+        <result column="is_delete" property="isDelete"/>
+        <result column="create_by_uid" property="createByUid"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by_uid" property="updateByUid"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="selectFileListById" resultMap="esFileDTOList">
+        SELECT
+            f.*
+        FROM (SELECT
+                  off.file_id,
+                  ofi.lang,
+                  off.sort,
+                  off.file_format,
+                  ofi.file_name,
+                  ofi.file_url,
+                  ofi.file_desc,
+                  ofi.file_content,
+                  off.is_enable,
+                  off.is_delete,
+                  off.create_by_uid,
+                  off.create_time,
+                  off.update_by_uid,
+                  off.update_time
+              FROM off_file off
+                       LEFT JOIN off_file_i18n  ofi on ofi.file_id = off.file_id) f
+        WHERE f.is_delete = 0  and f.file_id =  #{fileId}
+    </select>
+
+</mapper>

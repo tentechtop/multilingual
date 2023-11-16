@@ -1,0 +1,13 @@
+com\alphay\boot\generator\util\VelocityUtils.class
+com\alphay\boot\generator\controller\GenController.class
+com\alphay\boot\generator\service\IGenTableService.class
+com\alphay\boot\generator\domain\GenTable.class
+com\alphay\boot\generator\config\GenConfig.class
+com\alphay\boot\generator\service\IGenTableColumnService.class
+com\alphay\boot\generator\mapper\GenTableColumnMapper.class
+com\alphay\boot\generator\domain\GenTableColumn.class
+com\alphay\boot\generator\mapper\GenTableMapper.class
+com\alphay\boot\generator\util\VelocityInitializer.class
+com\alphay\boot\generator\service\GenTableColumnServiceImpl.class
+com\alphay\boot\generator\util\GenUtils.class
+com\alphay\boot\generator\service\GenTableServiceImpl.class
